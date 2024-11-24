@@ -1,8 +1,8 @@
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use std::sync::Arc;
-use crate::api::{add_order, get_order, get_orders_for_table, remove_order};
 
+// NOTE: All modules should be include here even though its not directly used in main
 mod db;
 mod api;
 mod models;
@@ -11,6 +11,7 @@ mod models;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
+    // Initialize the SQLite connection pool
     let pool = db::initialize_database()
         .await
         .map_err(|e| {
@@ -18,8 +19,6 @@ async fn main() -> std::io::Result<()> {
             std::io::Error::new(std::io::ErrorKind::Other, e)
         })?;
 
-    // Initialize the SQLite connection pool
-    // let pool = SqlitePool::connect(&database_url).await.unwrap();
     let shared_pool = Arc::new(pool);
 
     // Start the Actix Web Server

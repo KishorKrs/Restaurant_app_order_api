@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse, Responder};
-use sqlx::{SqlitePool};
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use rand::Rng;
 
