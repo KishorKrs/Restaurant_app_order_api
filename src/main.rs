@@ -44,6 +44,20 @@ async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>
     }
 }
 
+// get all orders for a table
+async fn get_orders_for_table(table_number: web::Path<i32>, pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
+    let query = "SELECT id, table_number, item, cook_time FROM orders WHERE table_number = ?";
+    let rows = sqlx::query_as::<_, Order>(query)
+        .bind(table_number.into_inner())
+        .fetch_all(pool.get_ref().as_ref())
+        .await;
+
+    match rows {
+        Ok(orders) => HttpResponse::Ok().json(orders),
+        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+    }
+}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -56,6 +70,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(shared_pool.clone()))
             .route("/orders", web::post().to(add_order))    // Add order
+            .route("/orders/{table_number}", web::get().to(get_orders_for_table))
     })
     .bind(("127.0.0.1", 8000))?
     .run()
