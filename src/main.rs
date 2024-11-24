@@ -25,10 +25,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(shared_pool.clone()))
-            .route("/orders", web::post().to(add_order))
-            .route("/orders/{table_number}", web::get().to(get_orders_for_table))
-            .route("/order", web::get().to(get_order))
-            .route("/orders", web::delete().to(remove_order))
+            .configure(api::config)
     })
     .bind(("127.0.0.1", 8000))?
     .run()

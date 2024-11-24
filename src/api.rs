@@ -5,6 +5,15 @@ use rand::Rng;
 
 use crate::models::{Order, OrderInput, QueryParams};
 
+pub fn config(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::resource("/orders")
+        .route(web::post().to(add_order))
+        .route(web::get().to(get_order))
+        .route(web::delete().to(remove_order))
+    ).service(web::resource("/orders/{table_number}")
+    .route(web::get().to(get_orders_for_table)));
+}
+
 // add an order
 pub async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
     let cook_time = rand::thread_rng().gen_range(5..=15); // Generate random number from 5 to 15
