@@ -5,6 +5,7 @@ use std::sync::Arc;
 // NOTE: All modules should be include here even though its not directly used in main
 mod db;
 mod api;
+mod utils;
 mod models;
 
 #[actix_web::main]

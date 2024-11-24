@@ -1,8 +1,8 @@
 use actix_web::{web, HttpResponse, Responder};
 use sqlx::SqlitePool;
 use std::sync::Arc;
-use rand::Rng;
 
+use crate::utils::generate_random_cook_time;
 use crate::models::{Order, OrderInput, QueryParams};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -16,7 +16,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
 
 // add an order
 pub async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
-    let cook_time = rand::thread_rng().gen_range(5..=15); // Generate random number from 5 to 15
+    let cook_time = generate_random_cook_time(); // Generate random number from 5 to 15
     let query = "INSERT INTO orders (table_number, item, cook_time) VALUES (?, ?, ?)";
     let result = sqlx::query(query)
         .bind(order.table_number)
