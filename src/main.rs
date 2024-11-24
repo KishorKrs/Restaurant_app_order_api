@@ -13,8 +13,14 @@ struct Order {
     cook_time: i32,     // Time to cook item (in minutes)
 }
 
+#[derive(Debug, Deserialize)]
+struct OrderInput {
+    table_number: i32,
+    item: String,
+}
+
 // add an order
-async fn add_order(order: web::Json<Order>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
+async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
     let cook_time = rand::thread_rng().gen_range(5..=15); // Generate random number from 5 to 15
     let query = "INSERT INTO orders (table_number, item, cook_time) VALUES (?, ?, ?)";
     let result = sqlx::query(query)
