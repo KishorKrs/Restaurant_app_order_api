@@ -19,6 +19,12 @@ struct OrderInput {
     item: String,
 }
 
+#[derive(Deserialize)]
+pub struct QueryParams {
+    table_number: i32,
+    order_id: i64,
+}
+
 // add an order
 async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
     let cook_time = rand::thread_rng().gen_range(5..=15); // Generate random number from 5 to 15
