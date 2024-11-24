@@ -82,6 +82,23 @@ async fn get_order(info: web::Query<QueryParams>, pool: web::Data<Arc<SqlitePool
     }
 }
 
+// remove an order
+async fn remove_order(info: web::Query<QueryParams>, pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
+    let table_number = info.table_number;
+    let order_id = info.order_id;
+    let query = "DELETE FROM orders WHERE id = ? AND table_number = ?";
+    let result = sqlx::query(query)
+        .bind(order_id)
+        .bind(table_number)
+        .execute(pool.get_ref().as_ref())
+        .await;
+
+    match result {
+        Ok(_) => HttpResponse::Ok().body("Order removed successfully"),
+        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+    }
+}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -96,6 +113,7 @@ async fn main() -> std::io::Result<()> {
             .route("/orders", web::post().to(add_order))    // Add order
             .route("/orders/{table_number}", web::get().to(get_orders_for_table))
             .route("/order", web::get().to(get_order))
+            .route("/orders", web::delete().to(remove_order))
     })
     .bind(("127.0.0.1", 8000))?
     .run()
