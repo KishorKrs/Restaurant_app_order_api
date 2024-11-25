@@ -72,13 +72,11 @@ pub async fn get_order(info: web::Query<QueryParams>, pool: web::Data<Arc<Sqlite
 }
 
 // remove an order
-pub async fn remove_order(info: web::Query<QueryParams>, pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
-    let table_number = info.table_number;
-    let order_id = info.order_id;
-    let query = "DELETE FROM orders WHERE id = ? AND table_number = ?";
+pub async fn remove_order(info: web::Path<i32>, pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
+    let order_id = info.into_inner();
+    let query = "DELETE FROM orders WHERE id = ?";
     let result = sqlx::query(query)
         .bind(order_id)
-        .bind(table_number)
         .execute(pool.get_ref().as_ref())
         .await;
 
