@@ -23,7 +23,6 @@ mod unit_tests {
     #[actix_web::test]
     async fn test_add_order() {
         let pool = setup_test_db().await;
-    
         let app = test::init_service(
             actix_web::App::new()
                 .app_data(pool.clone())
@@ -47,21 +46,46 @@ mod unit_tests {
     }
 
     #[actix_web::test]
-    async fn test_get_orders_for_table() {
+    async fn test_get_order() {
         let pool = setup_test_db().await;
+        let app = test::init_service(
+            actix_web::App::new()
+            .app_data(pool.clone())
+            .configure(api::config)
+        )
+        .await;
 
-        sqlx::query!("INSERT INTO orders (table_number, item, cook_time) VALUES (?, ?, ?)", 1, "Burger", 10)
+        // Insert test data
+        sqlx::query!("INSERT INTO orders (id, table_number, item, cook_time) VALUES (?, ?, ?, ?)", 100, 10, "Burger", 10)
             .execute(pool.get_ref().as_ref())
             .await
             .expect("Failed to insert order");
 
-        // Create a test server with the app configuration
+        let req = test::TestRequest::get().uri("/orders?table_number=10&order_id=100").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let body: models::Order = test::read_body_json(resp).await;
+        assert_eq!(body.item, "Burger");
+        assert_eq!(body.cook_time, 10);
+        assert_eq!(body.table_number, 10);
+    }
+
+    #[actix_web::test]
+    async fn test_get_orders_for_table() {
+        let pool = setup_test_db().await;
         let app = test::init_service(
             actix_web::App::new()
-                .app_data(pool.clone())
-                .configure(api::config),
+            .app_data(pool.clone())
+            .configure(api::config),
         )
         .await;
+
+        // Insert test data
+        sqlx::query!("INSERT INTO orders (table_number, item, cook_time) VALUES (?, ?, ?)", 1, "Burger", 10)
+            .execute(pool.get_ref().as_ref())
+            .await
+            .expect("Failed to insert order");
 
         let req = test::TestRequest::get().uri("/orders/1").to_request();
         let resp = test::call_service(&app, req).await;
@@ -77,26 +101,18 @@ mod unit_tests {
     #[actix_web::test]
     async fn test_remove_order() {
         let pool = setup_test_db().await;
-
-        // Insert test data
-        sqlx::query!(
-            "INSERT INTO orders (id, table_number, item, cook_time) VALUES (?, ?, ?, ?)",
-            1,
-            2,
-            "Sushi",
-            5
-        )
-        .execute(pool.get_ref().as_ref())
-        .await
-        .expect("Failed to insert order");
-
-        // Create a test server with the app configuration
         let app = test::init_service(
             actix_web::App::new()
                 .app_data(pool.clone())
                 .configure(api::config),
         )
         .await;
+
+        // Insert test data
+        sqlx::query!("INSERT INTO orders (id, table_number, item, cook_time) VALUES (?, ?, ?, ?)", 1, 2, "Sushi", 5)
+            .execute(pool.get_ref().as_ref())
+            .await
+            .expect("Failed to insert order");
 
         let req = test::TestRequest::delete().uri("/orders/1").to_request();
         let resp = test::call_service(&app, req).await;
