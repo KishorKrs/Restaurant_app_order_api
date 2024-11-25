@@ -6,12 +6,12 @@ use crate::utils::generate_random_cook_time;
 use crate::models::{Order, OrderInput, QueryParams};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::resource("/orders")
-        .route(web::post().to(add_order))
-        .route(web::get().to(get_order))
-        .route(web::delete().to(remove_order))
-    ).service(web::resource("/orders/{table_number}")
-    .route(web::get().to(get_orders_for_table)));
+    cfg.service(web::scope("/orders")
+        .route("", web::post().to(add_order))
+        .route("", web::get().to(get_order))
+        .route("/{table_number}", web::get().to(get_orders_for_table))
+        .route("/{order_id}", web::delete().to(remove_order))
+    );
 }
 
 // add an order
