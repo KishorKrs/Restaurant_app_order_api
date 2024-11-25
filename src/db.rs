@@ -1,6 +1,12 @@
 use std::{fs, env};
 use sqlx::{Sqlite, SqlitePool, migrate::MigrateDatabase};
 
+pub async fn get_pool() ->  Result<SqlitePool, sqlx::Error> {
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = SqlitePool::connect(&database_url).await?;
+    return Ok(pool);
+}
+
 /// Initialize the database by executing the migration file
 pub async fn initialize_database() -> Result<SqlitePool, sqlx::Error> {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
