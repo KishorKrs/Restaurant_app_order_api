@@ -28,7 +28,6 @@ mod integration_tests {
     #[actix_web::test]
     async fn test_add_order() {
         setup_db().await;
-
         let app = test::init_service(
             App::new()
                 .app_data(actix_web::web::Data::new(DB_POOL.clone()))
@@ -37,25 +36,18 @@ mod integration_tests {
         .await;
 
         // Simulate a POST request to add an order
-        let order_payload = json!({
-            "table_number": 1,
-            "item": "Pizza",
-        });
-
+        let order_payload = json!({"table_number": 1, "item": "Pizza"});
         let req = test::TestRequest::post()
             .uri("/orders")
             .set_json(&order_payload)
             .to_request();
         let resp = test::call_service(&app, req).await;
-
         assert!(resp.status().is_success());
-        
     }
 
     #[actix_web::test]
     async fn test_get_orders_for_table() {
         setup_db().await;
-
         let app = test::init_service(
             App::new()
                 .app_data(actix_web::web::Data::new(DB_POOL.clone()))
@@ -73,7 +65,6 @@ mod integration_tests {
             .uri("/orders/3")
             .to_request();
         let resp = test::call_service(&app, req).await;
-
         assert!(resp.status().is_success());
 
         // Validate the response
@@ -86,7 +77,6 @@ mod integration_tests {
     #[actix_web::test]
     async fn test_remove_order() {
         setup_db().await;
-
         let app = test::init_service(
             App::new()
                 .app_data(actix_web::web::Data::new(DB_POOL.clone()))
@@ -104,7 +94,6 @@ mod integration_tests {
             .uri("/orders/3")
             .to_request();
         let resp = test::call_service(&app, req).await;
-
         assert!(resp.status().is_success());
 
         // Verify that the order is removed
