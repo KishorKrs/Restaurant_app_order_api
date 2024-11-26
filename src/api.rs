@@ -5,14 +5,6 @@ use std::sync::Arc;
 use crate::utils::generate_random_cook_time;
 use crate::models::{Order, OrderInput, QueryParams};
 
-pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/orders")
-        .route("", web::post().to(add_order))
-        .route("", web::get().to(get_order))
-        .route("/{table_number}", web::get().to(get_orders_for_table))
-        .route("/{order_id}", web::delete().to(remove_order))
-    );
-}
 
 // add an order
 pub async fn add_order(order: web::Json<OrderInput>,pool: web::Data<Arc<SqlitePool>>,) -> impl Responder {
@@ -84,4 +76,8 @@ pub async fn remove_order(info: web::Path<i32>, pool: web::Data<Arc<SqlitePool>>
         Ok(_) => HttpResponse::Ok().body("Order removed successfully"),
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
+}
+
+pub async fn handle_404() -> impl Responder {
+    HttpResponse::NotFound().body("404 Not Found: The requested resource does not exist.")
 }

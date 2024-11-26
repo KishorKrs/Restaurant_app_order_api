@@ -1,12 +1,13 @@
 use actix_web::{web, App, HttpServer};
 use reqwest::blocking::Client;
-use std::{sync::Arc, thread};
+use std::{sync::Arc, thread, env};
 use dotenvy::dotenv;
 
 pub mod api;
 pub mod db;
 pub mod models;
 pub mod utils;
+pub mod route;
 
 // Function to simulate a single client making multiple requests
 fn simulate_client(client_id: usize, base_url: &str) {
@@ -63,6 +64,8 @@ fn simulate_client(client_id: usize, base_url: &str) {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
+    let port = env::var("PORT").expect("PORT must be set");
+    let port_num = port.parse::<u16>().unwrap();
 
     // Initialize the SQLite connection pool
     let pool = db::get_pool().await.expect("Failed to get the database pool");
@@ -73,13 +76,13 @@ async fn main() -> std::io::Result<()> {
     })?;
     
     // Start the Actix Web Server in a separate thread
-    let server_thread = thread::spawn(|| {
+    let server_thread = thread::spawn(move || {
         let server = HttpServer::new(move || {
             App::new()
                 .app_data(web::Data::new(shared_pool.clone()))
-                .configure(api::config)
+                .configure(route::config)
         })
-        .bind(("127.0.0.1", 8000))
+        .bind(("127.0.0.1", port_num))
         .expect("Failed to bind server")
         .run();
 
@@ -90,8 +93,8 @@ async fn main() -> std::io::Result<()> {
     // Simulate multiple clients in the main thread
     let client_threads: Vec<_> = (1..=10)
         .map(|id| {
-            let url = "http://127.0.0.1:8000";
-            thread::spawn(move || simulate_client(id, url))
+            let url = format!("http://127.0.01:{}", port);
+            thread::spawn(move || simulate_client(id, &url))
         })
         .collect();
 
