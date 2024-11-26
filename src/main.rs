@@ -7,6 +7,7 @@ pub mod api;
 pub mod db;
 pub mod models;
 pub mod utils;
+pub mod route
 
 // Function to simulate a single client making multiple requests
 fn simulate_client(client_id: usize, base_url: &str) {
@@ -77,7 +78,7 @@ async fn main() -> std::io::Result<()> {
         let server = HttpServer::new(move || {
             App::new()
                 .app_data(web::Data::new(shared_pool.clone()))
-                .configure(api::config)
+                .configure(route::config)
         })
         .bind(("127.0.0.1", 8000))
         .expect("Failed to bind server")
