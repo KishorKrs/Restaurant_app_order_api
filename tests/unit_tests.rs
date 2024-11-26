@@ -6,7 +6,8 @@ mod unit_tests {
     use actix_web::{web, http::StatusCode, test};
 
     use restaurant_app_order_api::db;
-    use restaurant_app_order_api::api;
+    use restaurant_app_order_api::route;
+    use restaurant_app_order_api::utils;
     use restaurant_app_order_api::models;
 
     // Helper function to set up an in-memory test database
@@ -26,7 +27,7 @@ mod unit_tests {
         let app = test::init_service(
             actix_web::App::new()
                 .app_data(pool.clone())
-                .configure(api::config),
+                .configure(route::config),
         )
         .await;
     
@@ -51,7 +52,7 @@ mod unit_tests {
         let app = test::init_service(
             actix_web::App::new()
             .app_data(pool.clone())
-            .configure(api::config)
+            .configure(route::config)
         )
         .await;
 
@@ -77,7 +78,7 @@ mod unit_tests {
         let app = test::init_service(
             actix_web::App::new()
             .app_data(pool.clone())
-            .configure(api::config),
+            .configure(route::config),
         )
         .await;
 
@@ -104,7 +105,7 @@ mod unit_tests {
         let app = test::init_service(
             actix_web::App::new()
                 .app_data(pool.clone())
-                .configure(api::config),
+                .configure(route::config),
         )
         .await;
 
