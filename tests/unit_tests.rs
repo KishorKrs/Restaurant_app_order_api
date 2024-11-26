@@ -125,4 +125,42 @@ mod unit_tests {
             .expect("Failed to fetch orders");
         assert!(remaining_orders.is_empty());
     }
+
+    #[actix_web::test]
+    async fn test_invalid_table() {
+        let pool = setup_test_db().await;
+        let app = test::init_service(
+            actix_web::App::new()
+                .app_data(pool.clone())
+                .configure(route::config),
+        )
+        .await;
+
+        // Access unavailable Orders API
+        let req = test::TestRequest::get().uri("/items").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert_eq!(resp.status(), 404);
+    }
+
+    #[actix_web::test]
+    async fn test_invalid_orders() {
+        let pool = setup_test_db().await;
+        let app = test::init_service(
+            actix_web::App::new()
+                .app_data(pool.clone())
+                .configure(route::config),
+        )
+        .await;
+
+        // Access Incorrect Table API
+        let req = test::TestRequest::get().uri("/orders/unavailable").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert_eq!(resp.status(), 404);
+    }
+
+    #[actix_web::test]
+    async fn test_cook_time() {
+        let cook_time = utils::generate_random_cook_time();
+        assert!(cook_time >= 5 && cook_time <= 15);
+    }
 }
